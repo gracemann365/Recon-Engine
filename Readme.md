@@ -31,3 +31,25 @@
     └─ pom.xml
 
 ```
+
+| **Technology** | **What It’s For / Why Used** |
+| --- | --- |
+| **Java (JDK 17+)** | Main programming language for all backend logic and services |
+| **Spring Boot** | Builds REST APIs, microservices, schedulers, security layers, etc. |
+| **Apache Kafka** | Ingests (streams in) large volumes of transaction data (if/when needed) |
+| **CSV File Input** | Rapid prototyping—read/write transaction and scheme files with zero setup |
+| **Apache Cassandra** | Stores all transaction match results (ledger), optimized for speed & scale |
+| **PostgreSQL** | Stores exceptions, manual resolutions, and admin/audit data (relational) |
+| **MinIO** | Acts as S3-compatible storage for reports and files, runs locally on Windows |
+| **JUnit** | Write and run unit tests for code correctness |
+| **k6** | Load testing—simulate thousands/millions of transactions |
+| **JMH** | Micro-benchmarking for critical sections (match logic, parsing, etc.) |
+| **Micrometer** | App metrics collection for Prometheus |
+| **Prometheus** | Time-series database to store and visualize app metrics |
+| **Grafana** | Dashboard/visualization for system metrics and health |
+| **OWASP ZAP** | Scans REST APIs for security vulnerabilities |
+| **Spring Security** | Adds HTTPS, authentication, and authorization to your APIs |
+
+---
+
+**Every tool above is open-source, runs natively on Windows, and can be installed without Docker or the cloud.**

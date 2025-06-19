@@ -35,46 +35,49 @@ package com.gracemann.recon.ingestionservice.producer;
 public class RawCsvTestMessages {
 
     /**
-     * Clean scheme transaction - matches BANK-TXN-001 from ISO messages
+     * Clean scheme transaction - matches BANK-TXN-006 from ISO messages
      */
-    public static final String VISA_CLEAN_TRANSACTION = "2024-06-20,VISA,BANK-TXN-111,4532123456789012,2500.00,INR,MERCH-101,TERM-101,00,BATCH-001";
+    public static final String VISA_CLEAN_TRANSACTION = "2024-07-15,VISA,BANK-TXN-667,4929001234567890,1750.50,INR,MERCH-201,TERM-201,00,BATCH-101";
 
     /**
-     * Mastercard transaction with missing terminal ID - matches BANK-TXN-002
+     * Mastercard transaction with missing merchant ID - matches BANK-TXN-007
      */
-    public static final String MASTERCARD_MISSING_TERMINAL = "2024-06-20,MASTERCARD,BANK-TXN-222,5234567890123456,5000.00,INR,MERCH-102,,00,BATCH-002";
+    public static final String MASTERCARD_MISSING_MERCHANT = "2024-07-15,MASTERCARD,BANK-TXN-778,5412345678901234,8500.75,USD,,TERM-202,00,BATCH-102";
 
     /**
-     * RuPay transaction with empty amount field (malformed) - matches BANK-TXN-003
+     * RuPay transaction with invalid currency code - matches BANK-TXN-008
      */
-    public static final String RUPAY_EMPTY_AMOUNT = "2024-06-20,RUPAY,BANK-TXN-333,4111111111111111,,INR,MERCH-103,TERM-103,00,BATCH-003";
+    public static final String RUPAY_INVALID_CURRENCY = "2024-07-15,RUPAY,BANK-TXN-889,6060123456789012,3000.25,XYZ,MERCH-203,TERM-203,05,BATCH-103";
 
     /**
-     * AMEX transaction with invalid date format - matches BANK-TXN-004
+     * AMEX transaction with malformed card number - matches BANK-TXN-009
      */
-    public static final String AMEX_INVALID_DATE = "20/06/2024,AMEX,BANK-TXN-444,6011123456789012,3200.75,USD,MERCH-104,TERM-104,00,BATCH-004";
+    public static final String AMEX_MALFORMED_CARD = "2024-07-15,AMEX,BANK-TXN-990,37412345678901,4200.00,USD,MERCH-204,TERM-204,00,BATCH-104";
 
     /**
-     * Visa transaction with missing batch ID and response code - matches
-     * BANK-TXN-005
+     * Visa transaction with declined response code - matches BANK-TXN-010
      */
-    public static final String VISA_MISSING_FIELDS = "2024-06-20,VISA,BANK-TXN-555,4532987654321098,10000.00,INR,MERCH-105,TERM-105,,";
+    public static final String VISA_DECLINED_TXN = "2024-07-15,VISA,BANK-TXN-101,4716123456789012,15000.00,INR,MERCH-205,TERM-205,14,BATCH-105";
 
     /**
-     * Malformed CSV with too few fields (missing last 3 columns) - additional test
-     * case
+     * CSV with extra commas and spaces (malformed structure) - additional test case
      */
-    public static final String MALFORMED_TOO_FEW_FIELDS = "2024-06-20,MASTERCARD,BANK-TXN-116,5555555555554444,1000.00,INR,MERCH-106";
+    public static final String MALFORMED_EXTRA_COMMAS = "2024-07-15,MASTERCARD,BANK-TXN-202,5555444433332222, 750.00 ,INR,MERCH-206,,00,BATCH-106,EXTRA-FIELD";
 
     /**
-     * Transaction with special characters in merchant ID - additional test case
+     * Transaction with zero amount (edge case) - additional test case
      */
-    public static final String SPECIAL_CHARS_MERCHANT = "2024-06-20,VISA,BANK-TXN-557,4532987654321098,750.75,INR,MERCH-107@#$,TERM-107,00,BATCH-007";
+    public static final String ZERO_AMOUNT_TXN = "2024-07-15,RUPAY,BANK-TXN-303,6011234567890123,0.00,INR,MERCH-207,TERM-207,00,BATCH-107";
 
     /**
-     * Transaction with negative amount (edge case) - additional test case
+     * Transaction with non-numeric amount containing letters - additional test case
      */
-    public static final String NEGATIVE_AMOUNT = "2024-06-20,RUPAY,BANK-TXN-998,6011987654321098,-500.00,INR,MERCH-108,TERM-108,00,BATCH-008";
+    public static final String ALPHA_AMOUNT = "2024-07-15,VISA,BANK-TXN-404,4532876543210987,ABC.50,INR,MERCH-208,TERM-208,00,BATCH-108";
+
+    /**
+     * Future dated transaction (edge case) - additional test case
+     */
+    public static final String FUTURE_DATE_TXN = "2025-12-31,MASTERCARD,BANK-TXN-505,5234876543210987,2250.80,EUR,MERCH-209,TERM-209,00,BATCH-109";
 
     /**
      * Empty CSV line for testing empty record handling
@@ -92,13 +95,14 @@ public class RawCsvTestMessages {
 
     public static final String[] ALL_MESSAGES = {
             VISA_CLEAN_TRANSACTION,
-            MASTERCARD_MISSING_TERMINAL,
-            RUPAY_EMPTY_AMOUNT,
-            AMEX_INVALID_DATE,
-            VISA_MISSING_FIELDS,
-            MALFORMED_TOO_FEW_FIELDS,
-            SPECIAL_CHARS_MERCHANT,
-            NEGATIVE_AMOUNT,
+            MASTERCARD_MISSING_MERCHANT,
+            RUPAY_INVALID_CURRENCY,
+            AMEX_MALFORMED_CARD,
+            VISA_DECLINED_TXN,
+            MALFORMED_EXTRA_COMMAS,
+            ZERO_AMOUNT_TXN,
+            ALPHA_AMOUNT,
+            FUTURE_DATE_TXN,
             EMPTY_LINE,
             CSV_HEADER
     };

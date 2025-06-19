@@ -37,7 +37,7 @@ public class RawIsoTestMessages {
     /**
      * Sample POS transaction message - successful purchase
      */
-    public static final String POS_PURCHASE_SUCCESS = "MTI=0200|txnId=BANK-TXN-001|cardNumber=4532123456789012|amount=2500.00|"
+    public static final String POS_PURCHASE_SUCCESS = "MTI=0200|txnId=BANK-TXN-111|cardNumber=4532123456789012|amount=2500.00|"
             +
             "txnTimestamp=2024-06-20T14:30:15|currency=INR|merchantId=MERCH-001|" +
             "terminalId=TERM-001|responseCode=00|channel=POS|authCode=AUTH123456";
@@ -45,7 +45,7 @@ public class RawIsoTestMessages {
     /**
      * Sample ATM withdrawal message - successful transaction
      */
-    public static final String ATM_WITHDRAWAL_SUCCESS = "MTI=0200|txnId=BANK-TXN-002|cardNumber=5234567890123456|amount=5000.00|"
+    public static final String ATM_WITHDRAWAL_SUCCESS = "MTI=0200|txnId=BANK-TXN-222|cardNumber=5234567890123456|amount=5000.00|"
             +
             "txnTimestamp=2024-06-20T15:45:30|currency=INR|merchantId=MERCH-002|" +
             "terminalId=TERM-002|responseCode=00|channel=ATM|authCode=AUTH789012";
@@ -53,7 +53,7 @@ public class RawIsoTestMessages {
     /**
      * Sample online transaction message - successful e-commerce purchase
      */
-    public static final String ONLINE_PURCHASE_SUCCESS = "MTI=0200|txnId=BANK-TXN-003|cardNumber=4111111111111111|amount=1750.50|"
+    public static final String ONLINE_PURCHASE_SUCCESS = "MTI=0200|txnId=BANK-TXN-333|cardNumber=4111111111111111|amount=1750.50|"
             +
             "txnTimestamp=2024-06-20T16:20:45|currency=INR|merchantId=MERCH-003|" +
             "terminalId=TERM-003|responseCode=00|channel=ONLINE|authCode=AUTH345678";
@@ -61,7 +61,7 @@ public class RawIsoTestMessages {
     /**
      * Sample mobile banking transaction message - successful transfer
      */
-    public static final String MOBILE_TRANSFER_SUCCESS = "MTI=0200|txnId=BANK-TXN-004|cardNumber=6011123456789012|amount=3200.75|"
+    public static final String MOBILE_TRANSFER_SUCCESS = "MTI=0200|txnId=BANK-TXN-444|cardNumber=6011123456789012|amount=3200.75|"
             +
             "txnTimestamp=2024-06-20T17:10:12|currency=INR|merchantId=MERCH-004|" +
             "terminalId=TERM-004|responseCode=00|channel=MOBILE|authCode=AUTH901234";
@@ -69,7 +69,7 @@ public class RawIsoTestMessages {
     /**
      * Sample declined transaction message - insufficient funds
      */
-    public static final String POS_PURCHASE_DECLINED = "MTI=0210|txnId=BANK-TXN-005|cardNumber=4532987654321098|amount=10000.00|"
+    public static final String POS_PURCHASE_DECLINED = "MTI=0210|txnId=BANK-TXN-555|cardNumber=4532987654321098|amount=10000.00|"
             +
             "txnTimestamp=2024-06-20T18:05:33|currency=INR|merchantId=MERCH-005|" +
             "terminalId=TERM-005|responseCode=51|channel=POS|authCode=";

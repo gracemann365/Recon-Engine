@@ -90,3 +90,4 @@ public class IngestionProcessor {
         violations.forEach(v -> log.warn("  {} {}", v.getPropertyPath(), v.getMessage()));
     }
 }
+//todo : all of this could another seperate class while into production

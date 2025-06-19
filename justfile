@@ -39,7 +39,7 @@ buildmm:
 # ── Running Services Locally ───────────────────────────────────────────
 
 runi:
-  mvn spring-boot:run -pl ingestion-service
+  mvn spring-boot:run -pl ingestion-service -DskipTests
 
 runm:
   mvn spring-boot:run -pl match-engine

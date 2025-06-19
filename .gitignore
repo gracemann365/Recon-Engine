@@ -54,9 +54,9 @@ $RECYCLE.BIN/
 
 
 # Environment/config (optional, uncomment as needed)
-# .env
+ .env
 # application-local.properties
-# application-dev.properties
+ application-dev.properties
 
 # Ignore dependency downloads
 **/.classpath
@@ -72,3 +72,4 @@ yarn-error.log*
 # ─────────────────────────────────────────────────────────
 # Add any custom or module-specific ignores below as needed
 # ─────────────────────────────────────────────────────────
+tools/akhq-0.25.1-all.jar

@@ -1,4 +1,4 @@
-    <project xmlns="http://maven.apache.org/POM/4.0.0"
+<project xmlns="http://maven.apache.org/POM/4.0.0"
          xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
          xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
 
@@ -8,57 +8,46 @@
     <version>1.0.0-SNAPSHOT</version>
     <packaging>pom</packaging>
     <name>Recon Engine</name>
-    <description>Demo: Multi-module Card Reconciliation Engine for Interview</description>
 
-    <!-- List all microservice modules (folders) here -->
-   <modules>
-    <module>ingestion-service</module>
-    <module>match-engine</module>
-    <module>report-service</module>
-    <module>exception-api</module>
-    <module>scheduler</module>
-    <module>monitor-metrics</module>
-</modules>
-
+    <modules>
+        <module>ingestion-service</module>
+        <module>match-engine</module>
+        <module>report-service</module>
+        <module>exception-api</module>
+        <module>scheduler</module>
+        <module>monitor-metrics</module>
+    </modules>
 
     <properties>
         <java.version>21</java.version>
         <spring.boot.version>3.2.6</spring.boot.version>
-        <!-- Add other shared versions as needed -->
+        <maven.compiler.source>21</maven.compiler.source>
+        <maven.compiler.target>21</maven.compiler.target>
     </properties>
 
     <dependencyManagement>
-    <dependencies>
-        <dependency>
-            <groupId>org.springframework.boot</groupId>
-            <artifactId>spring-boot-starter</artifactId>
-            <version>${spring.boot.version}</version>
-        </dependency>
-        <dependency>
-            <groupId>org.springframework.boot</groupId>
-            <artifactId>spring-boot-starter-web</artifactId>
-            <version>${spring.boot.version}</version>
-        </dependency>
-        <dependency>
-            <groupId>org.springframework.boot</groupId>
-            <artifactId>spring-boot-starter-test</artifactId>
-            <version>${spring.boot.version}</version>
-            <scope>test</scope>
-        </dependency>
-        <!-- Add more shared dependencies as needed, e.g., kafka, cassandra, postgres, micrometer, etc. -->
-    </dependencies>
-</dependencyManagement>
+        <dependencies>
+            <!-- Import Spring Boot BOM -->
+            <dependency>
+                <groupId>org.springframework.boot</groupId>
+                <artifactId>spring-boot-dependencies</artifactId>
+                <version>${spring.boot.version}</version>
+                <type>pom</type>
+                <scope>import</scope>
+            </dependency>
+        </dependencies>
+    </dependencyManagement>
 
     <build>
         <pluginManagement>
             <plugins>
-                <!-- Spring Boot Maven Plugin for all modules -->
+                <!-- Spring Boot Maven Plugin -->
                 <plugin>
                     <groupId>org.springframework.boot</groupId>
                     <artifactId>spring-boot-maven-plugin</artifactId>
                     <version>${spring.boot.version}</version>
                 </plugin>
-                <!-- Maven Compiler Plugin -->
+                <!-- Compiler -->
                 <plugin>
                     <groupId>org.apache.maven.plugins</groupId>
                     <artifactId>maven-compiler-plugin</artifactId>
@@ -68,14 +57,21 @@
                         <target>${java.version}</target>
                     </configuration>
                 </plugin>
-                <!-- Surefire Plugin for running tests -->
+                <!-- Surefire -->
                 <plugin>
                     <groupId>org.apache.maven.plugins</groupId>
                     <artifactId>maven-surefire-plugin</artifactId>
                     <version>3.1.2</version>
                 </plugin>
-                <!-- Add more plugins as you need -->
             </plugins>
         </pluginManagement>
     </build>
+
+    <!-- Use Maven Central only -->
+    <repositories>
+        <repository>
+            <id>central</id>
+            <url>https://repo.maven.apache.org/maven2</url>
+        </repository>
+    </repositories>
 </project>

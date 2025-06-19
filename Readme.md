@@ -1,4 +1,4 @@
-# [UPDATE] : Ingestion Engine - Complete
+# [UPDATE] : Ingestion Engine ✅
 
 The ingestion engine is now fully implemented with the following features:
 

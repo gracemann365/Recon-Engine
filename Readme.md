@@ -1,3 +1,22 @@
+# [UPDATE] : Ingestion Engine ✅
+
+The ingestion engine is now fully implemented with the following features:
+
+* Consumes raw bank and scheme transaction messages from Kafka topics
+* Normalizes and validates transaction data using JSR-380 annotations
+* Implements deduplication logic to filter out duplicate transactions
+* Forwards clean, validated, and unique transactions to the `ingested-txn-topic`
+* Includes a test producer utility to simulate raw ISO and CSV messages
+* Logs processing metrics and errors for observability
+
+This completes the core ingestion pipeline, providing a reliable, production-ready data intake foundation for downstream matching and reconciliation.
+
+Next steps: Integrate the match engine to consume from the ingested topic and perform reconciliation.
+## Upcoming : 
+### Reporting & Exception API
+### Monitoring 
+### Hardening Of Security & NFR
+
 # Why we’re building this
 
 - Every day the bank’s card-switch ledger produces millions of authorizations, while Visa and RuPay clear and settle those same transactions in their own daily files.

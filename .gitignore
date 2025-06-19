@@ -72,3 +72,4 @@ yarn-error.log*
 # ─────────────────────────────────────────────────────────
 # Add any custom or module-specific ignores below as needed
 # ─────────────────────────────────────────────────────────
+tools/akhq-0.25.1-all.jar

@@ -12,6 +12,11 @@ The ingestion engine is now fully implemented with the following features:
 This completes the core ingestion pipeline, providing a reliable, production-ready data intake foundation for downstream matching and reconciliation.
 
 Next steps: Integrate the match engine to consume from the ingested topic and perform reconciliation.
+## Upcoming : 
+### Reporting & Exception API
+### Monitoring 
+### Hardening Of Security & NFR
+
 # Why we’re building this
 
 - Every day the bank’s card-switch ledger produces millions of authorizations, while Visa and RuPay clear and settle those same transactions in their own daily files.

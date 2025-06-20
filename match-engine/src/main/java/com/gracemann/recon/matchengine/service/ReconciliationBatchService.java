@@ -1,12 +1,17 @@
 package com.gracemann.recon.matchengine.service;
 
+import com.gracemann.recon.matchengine.domain.BankSwitchTransactionLedger;
 import com.gracemann.recon.matchengine.domain.ReconciliationBatchControl;
+import com.gracemann.recon.matchengine.domain.SchemeSettlementTransactionLedger;
+import com.gracemann.recon.matchengine.dto.BatchWindowConfig;
 import com.gracemann.recon.matchengine.repository.ReconciliationBatchControlRepository;
+import com.gracemann.recon.matchengine.util.BatchWindowConfigParser;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.sql.Timestamp;
 import java.time.Instant;
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
@@ -14,38 +19,26 @@ import java.util.UUID;
 /**
  * Service class for managing the lifecycle and orchestration of reconciliation
  * batches.
- * <p>
- * This class encapsulates business logic for:
- * <ul>
- * <li>Creating new reconciliation batches with configuration metadata</li>
- * <li>Updating batch execution status, counters, and timings</li>
- * <li>Querying for active, latest, or historical batch executions</li>
- * <li>Providing orchestration entrypoints for batch-triggering controllers or
- * schedulers</li>
- * </ul>
- *
- * <b>Usage:</b> Call from REST controllers or scheduled jobs to manage batch
- * execution flow.
- *
- * @author David Grace
- * @since 1.0
  */
 @Service
 public class ReconciliationBatchService {
 
     private final ReconciliationBatchControlRepository batchRepo;
+    private final LedgerFetchService ledgerFetchService;
+    private final BatchWindowConfigParser configParser;
 
-    public ReconciliationBatchService(ReconciliationBatchControlRepository batchRepo) {
+    public ReconciliationBatchService(
+            ReconciliationBatchControlRepository batchRepo,
+            LedgerFetchService ledgerFetchService,
+            BatchWindowConfigParser configParser) {
         this.batchRepo = batchRepo;
+        this.ledgerFetchService = ledgerFetchService;
+        this.configParser = configParser;
     }
 
     /**
      * Creates and persists a new reconciliation batch, marking status as
      * PROCESSING.
-     *
-     * @param createdBy      Operator or process name that triggered this batch.
-     * @param configSnapshot Batch config/rule snapshot as JSON string.
-     * @return The persisted ReconciliationBatchControl entity.
      */
     @Transactional
     public ReconciliationBatchControl createNewBatch(String createdBy, String configSnapshot) {
@@ -53,22 +46,111 @@ public class ReconciliationBatchService {
         batch.setBatchStartTimestamp(Timestamp.from(Instant.now()));
         batch.setBatchExecutionStatus("PROCESSING");
         batch.setBatchCreatedBy(createdBy);
-        // Always provide a valid JSON object (even if empty)!!!
         batch.setBatchConfigurationSnapshot(
                 (configSnapshot == null || configSnapshot.isBlank()) ? "{}" : configSnapshot);
 
-        // batchExecutionId is auto-generated (DB or JPA)
         return batchRepo.save(batch);
     }
 
     /**
-     * Marks a batch as completed, updates all relevant counters and timestamps.
+     * MAIN ORCHESTRATION METHOD: Execute full batch processing.
      *
-     * @param batchId  UUID of the batch to mark as completed.
-     * @param endTime  Completion time.
-     * @param counters Updated batch counters (total processed, matched, unmatched,
-     *                 etc).
-     * @return Updated batch entity, or Optional.empty() if not found.
+     * This method:
+     * 1. Parses the window configuration from the batch
+     * 2. Fetches ledger data for the window
+     * 3. Runs matching logic (placeholder for now)
+     * 4. Updates batch status and counters
+     */
+    @Transactional
+    public void executeBatch(UUID batchId) {
+        Optional<ReconciliationBatchControl> batchOpt = batchRepo.findById(batchId);
+        if (batchOpt.isEmpty()) {
+            throw new IllegalArgumentException("Batch not found: " + batchId);
+        }
+
+        ReconciliationBatchControl batch = batchOpt.get();
+
+        try {
+            // Step 1: Parse window configuration
+            BatchWindowConfig windowConfig = parseWindowConfig(batch.getBatchConfigurationSnapshot());
+
+            // Step 2: Fetch ledger data
+            LedgerBatchWindow windowData = fetchLedgerTransactionsForWindow(
+                    windowConfig.getWindowStart(),
+                    windowConfig.getWindowEnd());
+
+            // Step 3: Run matching logic (placeholder)
+            BatchCounters results = runMatching(windowData);
+
+            // Step 4: Complete the batch
+            completeBatch(batchId, Timestamp.from(Instant.now()), results);
+
+        } catch (Exception e) {
+            // Mark batch as failed
+            failBatch(batchId, Timestamp.from(Instant.now()), e.getMessage());
+            throw new RuntimeException("Batch execution failed: " + e.getMessage(), e);
+        }
+    }
+
+    /**
+     * Parse window configuration from batch config snapshot.
+     */
+    private BatchWindowConfig parseWindowConfig(String configSnapshot) {
+        try {
+            return configParser.parseWindow(configSnapshot);
+        } catch (Exception e) {
+            // Fall back to default window if parsing fails
+            return configParser.createDefaultWindow();
+        }
+    }
+
+    /**
+     * Fetches all ledger transactions within the specified window.
+     */
+    @Transactional(readOnly = true)
+    public LedgerBatchWindow fetchLedgerTransactionsForWindow(LocalDateTime windowStart, LocalDateTime windowEnd) {
+        List<BankSwitchTransactionLedger> bankTxns = ledgerFetchService.fetchBankTransactions(windowStart, windowEnd);
+        List<SchemeSettlementTransactionLedger> schemeTxns = ledgerFetchService.fetchSchemeTransactions(windowStart,
+                windowEnd);
+        return new LedgerBatchWindow(bankTxns, schemeTxns);
+    }
+
+    /**
+     * PLACEHOLDER: Run matching logic on the fetched data.
+     * Replace this with your actual reconciliation engine.
+     */
+    private BatchCounters runMatching(LedgerBatchWindow windowData) {
+        // TODO: Replace with actual matching logic
+        int bankCount = windowData.bankTxns().size();
+        int schemeCount = windowData.schemeTxns().size();
+        int totalProcessed = bankCount + schemeCount;
+
+        // Placeholder counters
+        return new BatchCounters(
+                totalProcessed,
+                0, // exactMatches
+                0, // fuzzyMatches
+                bankCount, // unmatchedBank (all unmatched for now)
+                schemeCount, // unmatchedScheme (all unmatched for now)
+                0 // exceptions
+        );
+    }
+
+    /**
+     * Example method to test ledger fetching logic.
+     */
+    @Transactional(readOnly = true)
+    public void testLedgerFetch() {
+        LocalDateTime start = LocalDateTime.now().minusDays(30);
+        LocalDateTime end = LocalDateTime.now();
+        LedgerBatchWindow windowData = fetchLedgerTransactionsForWindow(start, end);
+
+        System.out.println("Bank txns found: " + windowData.bankTxns().size());
+        System.out.println("Scheme txns found: " + windowData.schemeTxns().size());
+    }
+
+    /**
+     * Marks a batch as completed, updates all relevant counters and timestamps.
      */
     @Transactional
     public Optional<ReconciliationBatchControl> completeBatch(UUID batchId, Timestamp endTime, BatchCounters counters) {
@@ -89,11 +171,6 @@ public class ReconciliationBatchService {
 
     /**
      * Marks a batch as failed with end timestamp and optional error message.
-     *
-     * @param batchId Batch UUID.
-     * @param endTime Failure timestamp.
-     * @param error   Optional error info (expand entity if you wish).
-     * @return Updated batch, or empty if not found.
      */
     @Transactional
     public Optional<ReconciliationBatchControl> failBatch(UUID batchId, Timestamp endTime, String error) {
@@ -101,7 +178,6 @@ public class ReconciliationBatchService {
         opt.ifPresent(batch -> {
             batch.setBatchEndTimestamp(endTime);
             batch.setBatchExecutionStatus("FAILED");
-            // (optional) batch.setErrorMessage(error);
             batchRepo.save(batch);
         });
         return opt;
@@ -109,8 +185,6 @@ public class ReconciliationBatchService {
 
     /**
      * Fetches the latest batch by start timestamp.
-     *
-     * @return Latest batch, or null if none exist.
      */
     @Transactional(readOnly = true)
     public ReconciliationBatchControl getLatestBatch() {
@@ -118,10 +192,7 @@ public class ReconciliationBatchService {
     }
 
     /**
-     * Fetches all batches by execution status (e.g., PROCESSING, COMPLETED).
-     *
-     * @param status Execution status filter.
-     * @return List of matching batches, latest first.
+     * Fetches all batches by execution status.
      */
     @Transactional(readOnly = true)
     public List<ReconciliationBatchControl> getBatchesByStatus(String status) {
@@ -130,16 +201,19 @@ public class ReconciliationBatchService {
 
     /**
      * Fetches a batch by its UUID.
-     *
-     * @param batchId Batch UUID.
-     * @return Optional containing batch or empty if not found.
      */
     @Transactional(readOnly = true)
     public Optional<ReconciliationBatchControl> getBatchById(UUID batchId) {
         return batchRepo.findById(batchId);
     }
 
-    // -- Additional orchestration methods as needed for your flow --
+    /**
+     * DTO for returning both ledgers' transactions for a given batch window.
+     */
+    public record LedgerBatchWindow(
+            List<BankSwitchTransactionLedger> bankTxns,
+            List<SchemeSettlementTransactionLedger> schemeTxns) {
+    }
 
     /**
      * DTO for passing batch result counters to the completeBatch method.
@@ -152,5 +226,4 @@ public class ReconciliationBatchService {
             int unmatchedScheme,
             int exceptions) {
     }
-
 }

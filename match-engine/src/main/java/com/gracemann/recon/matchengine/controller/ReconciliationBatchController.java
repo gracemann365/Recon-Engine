@@ -8,24 +8,10 @@ import org.springframework.web.bind.annotation.*;
 
 import java.util.HashMap;
 import java.util.Map;
+import java.util.concurrent.CompletableFuture;
 
 /**
  * REST controller for triggering reconciliation batch execution.
- * <p>
- * Exposes an endpoint to start a new reconciliation batch.
- * This triggers the central batch orchestration service, which:
- * <ul>
- * <li>Creates a batch control record</li>
- * <li>Fetches transactions for the configured window</li>
- * <li>Runs reconciliation/matching logic</li>
- * <li>Persists match results and updates batch status/counters</li>
- * </ul>
- * <p>
- * Intended for manual or automated invocation (from UI, scheduler, or CLI).
- * </p>
- *
- * @author [Your Name]
- * @since 1.0
  */
 @RestController
 @RequestMapping("/api/batches")
@@ -38,12 +24,7 @@ public class ReconciliationBatchController {
     }
 
     /**
-     * Starts a new reconciliation batch.
-     *
-     * @param request JSON payload containing optional operator and config/rule
-     *                snapshot.
-     * @return Metadata of the triggered batch, including batch UUID and start
-     *         timestamp.
+     * Starts a new reconciliation batch and executes it asynchronously.
      */
     @PostMapping("/start")
     public ResponseEntity<Map<String, Object>> startBatch(@RequestBody(required = false) StartBatchRequest request) {
@@ -52,16 +33,63 @@ public class ReconciliationBatchController {
                 : "SYSTEM";
         String config = (request != null) ? request.configSnapshot() : null;
 
-        // Call service to create & start new batch
+        // Step 1: Create the batch record
         ReconciliationBatchControl batch = batchService.createNewBatch(operator, config);
 
-        // Build simple response
+        // Step 2: Execute the batch asynchronously
+        CompletableFuture.runAsync(() -> {
+            try {
+                batchService.executeBatch(batch.getBatchExecutionId());
+            } catch (Exception e) {
+                // Error handling is done inside executeBatch
+                System.err.println("Batch execution failed: " + e.getMessage());
+            }
+        });
+
+        // Step 3: Return immediate response
         Map<String, Object> response = new HashMap<>();
         response.put("batchExecutionId", batch.getBatchExecutionId());
         response.put("status", batch.getBatchExecutionStatus());
         response.put("batchStartTimestamp", batch.getBatchStartTimestamp());
+        response.put("message", "Batch started successfully and is processing in background");
 
         return ResponseEntity.status(HttpStatus.CREATED).body(response);
+    }
+
+    /**
+     * Test endpoint to verify ledger fetching works.
+     */
+    @PostMapping("/test-fetch")
+    public ResponseEntity<Map<String, Object>> testFetch() {
+        try {
+            batchService.testLedgerFetch();
+
+            Map<String, Object> response = new HashMap<>();
+            response.put("message", "Test fetch completed successfully. Check console logs for results.");
+            response.put("status", "SUCCESS");
+
+            return ResponseEntity.ok(response);
+        } catch (Exception e) {
+            Map<String, Object> response = new HashMap<>();
+            response.put("message", "Test fetch failed: " + e.getMessage());
+            response.put("status", "FAILED");
+
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(response);
+        }
+    }
+
+    /**
+     * Get batch status by ID.
+     */
+    @GetMapping("/{batchId}")
+    public ResponseEntity<ReconciliationBatchControl> getBatch(@PathVariable("batchId") String batchId) {
+        try {
+            return batchService.getBatchById(java.util.UUID.fromString(batchId))
+                    .map(batch -> ResponseEntity.ok(batch))
+                    .orElse(ResponseEntity.notFound().build());
+        } catch (IllegalArgumentException e) {
+            return ResponseEntity.badRequest().build();
+        }
     }
 
     /**
